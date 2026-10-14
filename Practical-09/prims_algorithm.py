@@ -1,42 +1,45 @@
-import sys
 
-# Number of vertices
+import heapq
+
 n = int(input("Enter number of vertices: "))
 
-# Enter adjacency matrix
-print("Enter the adjacency matrix:")
-graph = []
+graph = [[] for _ in range(n)]
 
-for i in range(n):
-    row = list(map(int, input().split()))
-    graph.append(row)
+m = int(input("Enter number of edges: "))
 
-selected = [False] * n
-selected[0] = True
+print("Enter edges (u v weight):")
+for _ in range(m):
+    u, v, w = map(int, input().split())
+
+    graph[u].append((w, v))
+    graph[v].append((w, u))
+
+visited = [False] * n
+min_heap = [(0, 0)]  # (weight, vertex)
+
+total_cost = 0
+edges = 0
 
 print("\nEdges in Minimum Spanning Tree:")
 
-edges = 0
-total_cost = 0
+while min_heap and edges < n - 1:
+    weight, u = heapq.heappop(min_heap)
 
-while edges < n - 1:
-    minimum = sys.maxsize
-    x = 0
-    y = 0
+    if visited[u]:
+        continue
 
-    for i in range(n):
-        if selected[i]:
-            for j in range(n):
-                if not selected[j] and graph[i][j] != 0:
-                    if graph[i][j] < minimum:
-                        minimum = graph[i][j]
-                        x = i
-                        y = j
+    visited[u] = True
+    total_cost += weight
 
-    print(x, "--", y, "=", graph[x][y])
+    if weight != 0:
+        print("Vertex", u, "with edge weight", weight)
+        edges += 1
 
-    total_cost += graph[x][y]
-    selected[y] = True
-    edges += 1
+    for w, v in graph[u]:
+        if not visited[v]:
+            heapq.heappush(min_heap, (w, v))
 
-print("Minimum Cost =", total_cost)
+if edges == n - 1:
+    print("Minimum Cost =", total_cost)
+else:
+    print("Graph is disconnected; MST does not exist.")
